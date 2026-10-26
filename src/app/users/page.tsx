@@ -12,6 +12,8 @@ export default function UsersPage() {
   const [users, setUsers] = useState(initialUsers);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [edit, setEdit] = useState<number | null>(null);
   function handleDelete(id: number) {
     const del = users.filter((user) => user.id !== id);
 
@@ -19,6 +21,11 @@ export default function UsersPage() {
   }
 
   function handleAdd(name: string, email: string) {
+
+    if(name === "" || email ===""){
+      setError("pls insert name or email")
+      return
+    }
     const ids = users.map((id) => id.id);
     const userId = Math.max(0, ...ids) + 1;
     const newUser = {
@@ -29,6 +36,49 @@ export default function UsersPage() {
     setUsers([...users, newUser]);
     setName("");
     setEmail("");
+    setError("");
+  }
+  function handleCancel(){
+    setName("")
+    setEmail("")
+    setEdit(null)
+    setError("")
+  }
+  function handleEdit(id : number,name : string,email :string){
+   setEdit(id)
+   setName(name)
+   setEmail(email)
+   setError("")
+  }
+  function handleUpdate(){
+    if(edit === null){
+      return
+    }
+    if(name.trim() === "" || email.trim() ===""){
+      setError("pls insert name or email")
+      return
+    }
+    if (!email.includes("@")) {
+      setError("Please enter a valid email");
+      return;
+    }
+    // if(!email.includes(".co")){
+    //    setError("pls put atleast .co")
+    //   return error
+    // }
+    
+    const updateData = users.map((user) =>{
+      if(user.id === edit){
+        return {...user,name,email}
+      }
+    
+      return user
+     
+      
+    })
+      setUsers(updateData);
+      handleCancel()
+      
   }
   return (
     <div>
@@ -43,6 +93,7 @@ export default function UsersPage() {
             <th>name</th>
             <th>Email</th>
             <th>Action</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody>
@@ -54,6 +105,9 @@ export default function UsersPage() {
 
               <td>
                 <button onClick={() => handleDelete(user.id)}>ลบ</button>
+              </td>
+              <td>
+                <button onClick={() => handleEdit(user.id,user.name,user.email)}>แก้ไข</button>
               </td>
             </tr>
           ))}
@@ -72,7 +126,8 @@ export default function UsersPage() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <button onClick={() => handleAdd(name, email)}> add user </button>
+      <p>{error}</p>
+      {edit === null ?  <button onClick={() => handleAdd(name, email)}> add user </button>: <> <button onClick={handleUpdate} > save </button> <button onClick={()=>handleCancel()}> cancel </button></>}
     </div>
   );
 }
