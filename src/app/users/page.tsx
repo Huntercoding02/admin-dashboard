@@ -12,20 +12,47 @@ export default function UsersPage() {
   const [users, setUsers] = useState(initialUsers);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState({
+  name: "",
+  email: "",
+});
   const [edit, setEdit] = useState<number | null>(null);
   function handleDelete(id: number) {
     const del = users.filter((user) => user.id !== id);
 
     setUsers(del);
   }
+  function validateUser(name: string, email: string) {
 
+     const newErrors = {
+    name: "",
+    email: "",
+  };
+
+    if(name.trim() === ""){
+      
+      newErrors.name =  "pls insert name"
+    }
+    if(email.trim() === ""){
+     
+      newErrors.email = "pls insert email"
+    }else if(!email.trim().includes("@")){
+       
+      newErrors.email =  "pls insert email correctly"
+    }
+    return newErrors
+  }
   function handleAdd(name: string, email: string) {
 
-    if(name === "" || email ===""){
-      setError("pls insert name or email")
-      return
+    const valid = validateUser(name,email)
+
+    setError(valid)
+
+    if(valid.name !== "" || valid.email !== ""){
+       
+       return
     }
+   
     const ids = users.map((id) => id.id);
     const userId = Math.max(0, ...ids) + 1;
     const newUser = {
@@ -36,32 +63,45 @@ export default function UsersPage() {
     setUsers([...users, newUser]);
     setName("");
     setEmail("");
-    setError("");
+    setError({
+  name: "",
+  email: "",
+});
   }
   function handleCancel(){
     setName("")
     setEmail("")
     setEdit(null)
-    setError("")
+    setError({
+  name: "",
+  email: "",
+});
   }
   function handleEdit(id : number,name : string,email :string){
    setEdit(id)
    setName(name)
    setEmail(email)
-   setError("")
+   setError({
+  name: "",
+  email: "",
+});
   }
   function handleUpdate(){
+
     if(edit === null){
       return
     }
-    if(name.trim() === "" || email.trim() ===""){
-      setError("pls insert name or email")
-      return
+    
+    const valid = validateUser(name,email)
+
+    setError(valid)
+
+    if(valid.name !== "" || valid.email !== ""){
+       
+       return
     }
-    if (!email.includes("@")) {
-      setError("Please enter a valid email");
-      return;
-    }
+    
+  
     // if(!email.includes(".co")){
     //    setError("pls put atleast .co")
     //   return error
@@ -119,6 +159,7 @@ export default function UsersPage() {
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
+      <p>{error.name}</p>
       <br />
       email :
       <input
@@ -126,7 +167,7 @@ export default function UsersPage() {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <p>{error}</p>
+      <p>{error.email}</p>
       {edit === null ?  <button onClick={() => handleAdd(name, email)}> add user </button>: <> <button onClick={handleUpdate} > save </button> <button onClick={()=>handleCancel()}> cancel </button></>}
     </div>
   );
