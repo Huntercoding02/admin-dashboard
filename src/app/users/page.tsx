@@ -13,15 +13,58 @@ export default function UsersPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState({
-  name: "",
-  email: "",
-});
+    name: "",
+    email: "",
+  });
   const [edit, setEdit] = useState<number | null>(null);
+  const [search,setSearch] = useState("")
+  const [currentPage,setCurrentPage] = useState<number >(1)
+  const [usersPerPage,setUsersPerPage] = useState<number >(3)
+  const [sortOrder,setSortOrder] = useState("asc")
+
+  //เอาไว้สำหรับค้นหาข้อมูล
+  const filterUser = users.filter((user) =>{
+    // user.name.toLowerCase().includes(search.toLowerCase())
+    //  return true
+    return user.name.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase())
+    
+  })
+
+  ///ตัวที่ไว้เรียงมากไปน้อย
+  const sortedUsers = [...filterUser].sort((a,b)=> { return sortOrder === "asc"? a.name.localeCompare(b.name): b.name.localeCompare(a.name) })
+  
+  //pagination
+  const totalPages = Math.max(1,Math.ceil(sortedUsers.length/usersPerPage))
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = sortedUsers.slice(indexOfFirstUser,indexOfLastUser)
+ 
+
   function handleDelete(id: number) {
     const del = users.filter((user) => user.id !== id);
 
     setUsers(del);
+    const filteredAfterDelete = del.filter((user) => {
+      return (
+        user.name.toLowerCase().includes(search.toLowerCase())
+        || user.email.toLowerCase().includes(search.toLowerCase())
+      );
+    });
+
+    const newTotalPages = Math.max(
+    1,
+      Math.ceil(filteredAfterDelete.length / usersPerPage)
+    );
+
+    if (currentPage > newTotalPages) {
+      setCurrentPage(newTotalPages);
+    }
+
+     
+  
   }
+
+  
   function validateUser(name: string, email: string) {
 
      const newErrors = {
@@ -91,7 +134,7 @@ export default function UsersPage() {
     if(edit === null){
       return
     }
-    
+
     const valid = validateUser(name,email)
 
     setError(valid)
@@ -120,6 +163,19 @@ export default function UsersPage() {
       handleCancel()
       
   }
+  function handleNext() {
+    if(totalPages > currentPage){
+      setCurrentPage(currentPage + 1)
+    }
+    
+  }
+  function handlePrevious() {
+    if(currentPage>1){
+      setCurrentPage(currentPage - 1)
+    }
+    
+  }
+  
   return (
     <div>
       <h1>user management</h1>
@@ -137,7 +193,26 @@ export default function UsersPage() {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {/* {users.map((user) => (
+            <tr key={user.id}>
+              <td>{user.id}</td>
+              <td>{user.name}</td>
+              <td>{user.email}</td>
+
+              <td>
+                <button onClick={() => handleDelete(user.id)}>ลบ</button>
+              </td>
+              <td>
+                <button onClick={() => handleEdit(user.id,user.name,user.email)}>แก้ไข</button>
+              </td>
+            </tr>
+          ))} */}
+          {currentUsers.length === 0 ?(
+                  <tr>
+          <td colSpan={5}>ไม่พบข้อมูล</td>
+        </tr>
+          ): currentUsers.map((user) => (
+            
             <tr key={user.id}>
               <td>{user.id}</td>
               <td>{user.name}</td>
@@ -151,6 +226,7 @@ export default function UsersPage() {
               </td>
             </tr>
           ))}
+          
         </tbody>
       </table>
       name :
@@ -169,6 +245,20 @@ export default function UsersPage() {
       />
       <p>{error.email}</p>
       {edit === null ?  <button onClick={() => handleAdd(name, email)}> add user </button>: <> <button onClick={handleUpdate} > save </button> <button onClick={()=>handleCancel()}> cancel </button></>}
+<br />
+      <input type="text" value={search} placeholder="Search users..." onChange={(e)=> {setSearch(e.target.value); setCurrentPage(1)}} />
+      <select value = {sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+        <option value="asc" >a-z</option>
+        <option value="desc" >z-a</option>
+      </select>
+      <div>
+        <button disabled={currentPage === 1} onClick={() => handlePrevious()}> prev</button>
+        <p>page {currentPage} of {totalPages} page(s)</p>
+          <button disabled={currentPage === totalPages} onClick={() => handleNext()}> next</button>
+          
+          
+      </div>
+      
     </div>
   );
 }

@@ -44,12 +44,44 @@
     return less
  }
  const res = findSmallest([10, -2, 7, 0])
+
+ function descendingOrder(n) {
+  return Number(String(n).split("").sort((a,b)=> b - a ).join(""))
+}
+
+const res1 = descendingOrder(123456789)
+
+function XO(str : string) {
+   let str1 =str.toLowerCase().split("")
+  if(!str1.includes("x") && !str1.includes("o")){
+    return true;
+  }
+  let countX = 0;
+  let countO = 0;
+  
+    for(let i=0; i< str1.length ;i++){
+        if(str[i] === "x"){
+            countX++
+        }else if(str[i] === "o"){
+            countO++
+        }
+        if(countO == countX){
+            return true
+        }else{
+            return false
+        }
+    }
+  
+}
+const res2 = XO(("xxx"))
 export default function AlgoPage() {
   return (
      <>
   <h1>Algorithm Practice</h1>
   <p>result :  {JSON.stringify(result)}</p>
   <p>result :  {JSON.stringify(res)}</p>
+  <p>result :  {JSON.stringify(res1)}</p>
+  <p>result :  {JSON.stringify(res2)}</p>
   </>
   )
  
